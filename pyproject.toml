@@ -16,6 +16,9 @@ dependencies = [
 [tool.taskipy.tasks]
 b-room = "python -m streamlit run ./src/main.py"
 
+[tool.poetry]
+package-mode = false
+
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.14.1"
 
