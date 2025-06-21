@@ -3,6 +3,8 @@ import streamlit as st
 from sqlmodel import create_engine
 from loguru import logger
 
+from models.exchanges.bybit import ByBitInstrument, ByBitCategory
+
 logger.add("xini.log", retention="2 days")
 logger.info("Dashboard started")
 
@@ -29,10 +31,16 @@ def backtester():
 
 def exchanges():
     st.title("Exchanges")
-
     header_buttons()
 
-    st.write("This page shows data extracted from crypto exchanges.")
+    st.write("This page shows data extracted from several crypto exchanges.")
+
+    (tab1,) = st.tabs(["ByBit"])
+
+    with tab1:
+        with st.expander("Instruments"):
+            instruments = ByBitInstrument.fetch(ByBitCategory.SPOT)
+            st.table([i.model_dump() for i in instruments])
 
 
 exc_page = st.Page(exchanges, icon="🔀")
