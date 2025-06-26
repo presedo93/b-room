@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Generic, TypeVar
 
+from loguru import logger
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
@@ -32,29 +33,31 @@ class ByBitInstrument(BaseModel):
     )
 
     symbol: str
-    category: str
+    category: str | None = None
     base_coin: str
     quote_coin: str
 
     @classmethod
     def fetch(cls, category: "ByBitCategory") -> list["ByBitInstrument"]:
         """Fetch instruments from ByBit API."""
+        logger.info(f"ByBit instruments fetch started for {category}")
+
         endpoint = "https://api.bybit.com/v5/market/instruments-info"
         params = {"category": category.value}
 
         response = httpx.get(endpoint, params=params)
         response.raise_for_status()
 
+        logger.trace(f"ByBit instruments fetch response: {response.text}")
         result = ByBitResponse[ByBitInstrument].model_validate(response.json())
         category = ByBitCategory.from_str(result.result.category)
-        print(category.value)
 
         return [
             cls(
                 symbol=d.symbol,
                 base_coin=d.base_coin,
                 quote_coin=d.quote_coin,
-                category=category.value,
+                category="spot",
             )
             for d in result.result.list
         ]
