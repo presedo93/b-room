@@ -22,7 +22,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.basedpyright]
-# reportUnannotatedClassAttribute = 'none'
+reportUnannotatedClassAttribute = 'none'
 reportUnknownMemberType = 'none'
 reportUnusedCallResult = 'none'
-# reportAny = 'none'
+reportAny = 'none'
