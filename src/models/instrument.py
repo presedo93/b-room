@@ -12,7 +12,7 @@ from __future__ import annotations
 # pylint: disable=import-error
 
 from enum import Enum
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from sqlmodel import Field, SQLModel, Session
 from sqlalchemy.dialects.sqlite import insert
@@ -53,9 +53,11 @@ class Instrument(SQLModel, table=True):
         Uses SQLite's ON CONFLICT clause to perform an upsert based on the
         (exchange, name) composite primary key.
         """
+        values_dict = cast(dict[str, object], self.model_dump())
+
         stmt = (
             insert(Instrument)
-            .values(**self.model_dump())
+            .values(**values_dict)
             .on_conflict_do_update(
                 index_elements=["exchange", "name"],
                 set_={
