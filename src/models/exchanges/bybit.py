@@ -4,6 +4,8 @@ This module contains pydantic models that mirror the ByBit API responses and
 convenience helpers to fetch instrument lists from the public API.
 """
 
+from __future__ import annotations
+
 # Allow imports from third-party packages that may not be available in the
 # linting environment.
 # pylint: disable=import-error
@@ -12,7 +14,7 @@ from enum import Enum
 from typing import Generic, TypeVar
 
 from loguru import logger
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 import httpx
@@ -27,7 +29,7 @@ class ByBitResponse(BaseModel, Generic[T]):
         alias_generator=to_camel, validate_by_name=True, validate_by_alias=True
     )
 
-    result: "ByBitResult[T]"
+    result: ByBitResult[T]
 
 
 class ByBitResult(BaseModel, Generic[T]):
@@ -37,8 +39,8 @@ class ByBitResult(BaseModel, Generic[T]):
         alias_generator=to_camel, validate_by_name=True, validate_by_alias=True
     )
 
-    category: "ByBitCategory"
-    list: list[T]
+    category: ByBitCategory
+    instruments: list[T] = Field(alias="list")
 
 
 class ByBitInstrument(BaseModel):
@@ -54,7 +56,7 @@ class ByBitInstrument(BaseModel):
     quote_coin: str
 
     @classmethod
-    def fetch(cls, category: "ByBitCategory") -> list["ByBitInstrument"]:
+    def fetch(cls, category: ByBitCategory) -> list[ByBitInstrument]:
         """Fetch instruments from ByBit API for the requested category.
 
         Returns a list of ByBitInstrument DTOs built from the API response.
@@ -69,16 +71,28 @@ class ByBitInstrument(BaseModel):
 
         logger.trace(f"ByBit instruments fetch response: {response.text}")
         result = ByBitResponse[ByBitInstrument].model_validate(response.json())
-        _ = ByBitCategory.from_str(result.result.category)
+
+        # Determine a sensible category string. The API may return the category
+        # either as a plain string or it may already be parsed into a ByBitCategory
+        # enum by pydantic. Handle both cases and prefer a per-instrument
+        # category when available.
+        top_cat_raw = result.result.category
+        top_category = top_cat_raw.value if hasattr(top_cat_raw, "value") else str(top_cat_raw)
+
+        def _item_category(item: ByBitInstrument) -> str:
+            item_cat_raw = getattr(item, "category", None)
+            if item_cat_raw is None:
+                return top_category
+            return item_cat_raw.value if hasattr(item_cat_raw, "value") else str(item_cat_raw)
 
         return [
             cls(
                 symbol=d.symbol,
                 base_coin=d.base_coin,
                 quote_coin=d.quote_coin,
-                category="spot",
+                category=_item_category(d),
             )
-            for d in result.result.list
+            for d in result.result.instruments
         ]
 
 
@@ -91,6 +105,6 @@ class ByBitCategory(str, Enum):
     OPTION = "option"
 
     @classmethod
-    def from_str(cls, category: str) -> "ByBitCategory":
+    def from_str(cls, category: str) -> ByBitCategory:
         """Convert a string to a ByBitCategory enum in a case-insensitive way."""
         return cls(category.lower())
