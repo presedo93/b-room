@@ -14,12 +14,6 @@ dependencies = [
   "httpx (>=0.28.1,<0.29.0)",
 ]
 
-[dependency-groups]
-dev = ["taskipy>=1.14.1,<2"]
-
-[tool.taskipy.tasks]
-b-room = "python -m streamlit run ./src/main.py"
-
 [tool.uv]
 package = false
 
@@ -28,7 +22,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.basedpyright]
-reportUnannotatedClassAttribute = 'none'
+# reportUnannotatedClassAttribute = 'none'
 reportUnknownMemberType = 'none'
 reportUnusedCallResult = 'none'
-reportAny = 'none'
+# reportAny = 'none'

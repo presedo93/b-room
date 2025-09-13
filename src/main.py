@@ -1,3 +1,13 @@
+"""Streamlit app for the b-room dashboard.
+
+This module defines the Streamlit pages, database setup and helper
+functions to fetch and populate ByBit instruments.
+"""
+
+# Allow imports from third-party packages that may not be available in the
+# linting environment.
+# pylint: disable=import-error
+
 import streamlit as st
 
 from sqlmodel import SQLModel, Session, create_engine, select
@@ -14,7 +24,8 @@ engine = create_engine("sqlite:///xini.db")
 SQLModel.metadata.create_all(engine)
 
 
-def header_buttons():
+def header_buttons() -> None:
+    """Render the header page links."""
     c1, _, c3 = st.columns(3)
 
     with c1:
@@ -24,7 +35,8 @@ def header_buttons():
         st.page_link(bck_page, label="b-room", icon="🧠", use_container_width=True)
 
 
-def backtester():
+def backtester() -> None:
+    """Render the Backtester page."""
     st.title("Backtester")
 
     header_buttons()
@@ -32,7 +44,8 @@ def backtester():
     st.write("This is the page where the magic happens.")
 
 
-def exchanges():
+def exchanges() -> None:
+    """Render the Exchanges page."""
     st.title("Exchanges")
     header_buttons()
 

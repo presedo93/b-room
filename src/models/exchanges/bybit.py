@@ -1,3 +1,13 @@
+"""ByBit exchange data transfer objects and helpers.
+
+This module contains pydantic models that mirror the ByBit API responses and
+convenience helpers to fetch instrument lists from the public API.
+"""
+
+# Allow imports from third-party packages that may not be available in the
+# linting environment.
+# pylint: disable=import-error
+
 from enum import Enum
 from typing import Generic, TypeVar
 
@@ -11,6 +21,8 @@ T = TypeVar("T")
 
 
 class ByBitResponse(BaseModel, Generic[T]):
+    """Top-level response wrapper returned by ByBit."""
+
     model_config = ConfigDict(
         alias_generator=to_camel, validate_by_name=True, validate_by_alias=True
     )
@@ -19,6 +31,8 @@ class ByBitResponse(BaseModel, Generic[T]):
 
 
 class ByBitResult(BaseModel, Generic[T]):
+    """Result container for ByBit API responses."""
+
     model_config = ConfigDict(
         alias_generator=to_camel, validate_by_name=True, validate_by_alias=True
     )
@@ -28,6 +42,8 @@ class ByBitResult(BaseModel, Generic[T]):
 
 
 class ByBitInstrument(BaseModel):
+    """Pydantic model that represents a ByBit instrument record."""
+
     model_config = ConfigDict(
         alias_generator=to_camel, validate_by_name=True, validate_by_alias=True
     )
@@ -39,7 +55,10 @@ class ByBitInstrument(BaseModel):
 
     @classmethod
     def fetch(cls, category: "ByBitCategory") -> list["ByBitInstrument"]:
-        """Fetch instruments from ByBit API."""
+        """Fetch instruments from ByBit API for the requested category.
+
+        Returns a list of ByBitInstrument DTOs built from the API response.
+        """
         logger.info(f"ByBit instruments fetch started for {category}")
 
         endpoint = "https://api.bybit.com/v5/market/instruments-info"
@@ -50,7 +69,7 @@ class ByBitInstrument(BaseModel):
 
         logger.trace(f"ByBit instruments fetch response: {response.text}")
         result = ByBitResponse[ByBitInstrument].model_validate(response.json())
-        category = ByBitCategory.from_str(result.result.category)
+        _ = ByBitCategory.from_str(result.result.category)
 
         return [
             cls(
@@ -64,6 +83,8 @@ class ByBitInstrument(BaseModel):
 
 
 class ByBitCategory(str, Enum):
+    """Enumeration of ByBit API categories."""
+
     SPOT = "spot"
     LINEAR = "linear"
     INVERSE = "inverse"
@@ -71,5 +92,5 @@ class ByBitCategory(str, Enum):
 
     @classmethod
     def from_str(cls, category: str) -> "ByBitCategory":
-        """Convert a string to a ByBitCategory enum."""
+        """Convert a string to a ByBitCategory enum in a case-insensitive way."""
         return cls(category.lower())
