@@ -4,13 +4,11 @@ This module defines the Streamlit pages, database setup and helper
 functions to fetch and populate ByBit instruments.
 """
 
-# Allow imports from third-party packages that may not be available in the
-# linting environment.
-# pylint: disable=import-error
+from typing import cast
 
 import streamlit as st
-
 from sqlmodel import SQLModel, Session, create_engine, select
+from sqlalchemy.engine import Engine
 from loguru import logger
 
 from models.exchanges.bybit import ByBitInstrument, ByBitCategory
@@ -20,7 +18,7 @@ logger.level("DEBUG")
 logger.add("xini.log", retention="2 days")
 logger.info("Dashboard started")
 
-engine = create_engine("sqlite:///xini.db")
+engine: Engine = create_engine("sqlite:///xini.db")
 SQLModel.metadata.create_all(engine)
 
 
@@ -67,27 +65,34 @@ def exchanges() -> None:
             )
 
             instruments = get_bybit_instruments()
-            st.table([i.model_dump() for i in instruments[:5]])
+            # Cast the dumped model to a concrete mapping type to avoid Any
+            # propagation from pydantic's model_dump() stub in the type checker.
+            table_rows = [
+                cast(dict[str, object], i.model_dump()) for i in instruments[:5]
+            ]
+            st.table(table_rows)
 
 
 @st.cache_data(ttl=60 * 60 * 24, show_spinner=False)
-def get_bybit_instruments():
+def get_bybit_instruments() -> list[Instrument]:
     """Fetch ByBit instruments from the database."""
     with Session(engine) as session:
         statement = select(Instrument).where(Instrument.exchange == "bybit")
-        instruments = session.exec(statement).all()
+        instruments = cast(list[Instrument], session.exec(statement).all())
     return instruments
 
 
-def populate_bybit_instruments():
+def populate_bybit_instruments() -> None:
     """Populate the database with ByBit instruments."""
     logger.info("Populating ByBit instruments...")
     instruments = ByBitInstrument.fetch(ByBitCategory.LINEAR)
+
     with Session(engine) as session:
         for instrument in instruments:
             Instrument.from_bybit(instrument).upsert(session)
         session.commit()
 
+    st.cache_data.clear()
     if instruments:
         logger.info(f"Fetched {len(instruments)} ByBit instruments.")
         st.success(f"Fetched {len(instruments)} ByBit instruments.")
@@ -101,5 +106,4 @@ bck_page = st.Page(backtester, icon="🧠")
 
 if __name__ == "__main__":
     st.set_page_config(initial_sidebar_state="collapsed")
-
     st.navigation([exc_page, bck_page], position="hidden").run()

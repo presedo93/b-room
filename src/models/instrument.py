@@ -5,20 +5,12 @@ categorize instruments. Helper constructors and an upsert helper are
 provided to integrate with exchange-specific DTOs.
 """
 
-from __future__ import annotations
-
-# Allow imports from third-party packages that may not be available in the
-# linting environment.
-# pylint: disable=import-error
-
 from enum import Enum
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import ClassVar, cast
 
 from sqlmodel import Field, SQLModel, Session
 from sqlalchemy.dialects.sqlite import insert
-
-if TYPE_CHECKING:
-    from models.exchanges.bybit import ByBitInstrument
+from models.exchanges.bybit import ByBitInstrument
 
 
 class Instrument(SQLModel, table=True):
@@ -33,7 +25,7 @@ class Instrument(SQLModel, table=True):
     quote: str
 
     @classmethod
-    def from_bybit(cls, data: ByBitInstrument) -> Instrument:
+    def from_bybit(cls, data: ByBitInstrument) -> "Instrument":
         """Create an Instrument from a ByBitInstrument DTO.
 
         The ByBit data may provide a category or leave it empty; default to
@@ -80,7 +72,7 @@ class Kind(str, Enum):
     OPTION = "option"
 
     @classmethod
-    def from_str(cls, category: str) -> Kind:
+    def from_str(cls, category: str) -> "Kind":
         """Convert a string to a Kind enum.
 
         The input is lower-cased to make the conversion case-insensitive.

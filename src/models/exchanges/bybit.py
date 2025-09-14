@@ -11,7 +11,7 @@ from __future__ import annotations
 # pylint: disable=import-error
 
 from enum import Enum
-from typing import Generic, TypeVar, ClassVar, cast
+from typing import Generic, TypeVar, ClassVar
 
 from loguru import logger
 from pydantic import BaseModel, ConfigDict, Field
@@ -70,21 +70,10 @@ class ByBitInstrument(BaseModel):
         response.raise_for_status()
 
         logger.trace(f"ByBit instruments fetch response: {response.text}")
-        # model_validate may be untyped at the stub level; cast to the expected
-        # pydantic model so the type checker doesn't propagate Any.
-        result = cast(
-            ByBitResponse["ByBitInstrument"],
-            ByBitResponse["ByBitInstrument"].model_validate(response.json()),
-        )
+        result = ByBitResponse["ByBitInstrument"].model_validate(response.json())
 
-        # Determine a sensible category string. The API may return the category
-        # either as a plain string or it may already be parsed into a ByBitCategory
-        # enum by pydantic. Handle both cases and prefer a per-instrument
-        # category when available.
-        top_cat_raw = result.result.category
-        top_category = (
-            top_cat_raw.value if hasattr(top_cat_raw, "value") else str(top_cat_raw)
-        )
+        category = result.result.category
+        top_category = category.value if hasattr(category, "value") else str(category)
 
         def _item_category(item: "ByBitInstrument") -> str:
             item_cat_raw = getattr(item, "category", None)
