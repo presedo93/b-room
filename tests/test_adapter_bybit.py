@@ -1,13 +1,3 @@
-import os
-import sys
-
-
-# Ensure `src` on sys.path
-CURRENT_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-
 import httpx
 import respx  # type: ignore
 
@@ -52,4 +42,3 @@ def test_bybit_adapter_maps_response() -> None:
     assert items[0].kind == "linear"
     assert items[0].base == "BTC"
     assert items[0].quote == "USDT"
-

@@ -61,7 +61,7 @@ dependencies = [
     { name = "streamlit" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -74,14 +74,17 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1,<0.29.0" },
     { name = "loguru", specifier = ">=0.7.3,<0.8.0" },
     { name = "pydantic", specifier = ">=2.11.7,<3.0.0" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.3.0,<9.0.0" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0.0,<6.0.0" },
-    { name = "respx", marker = "extra == 'test'", specifier = ">=0.21.1,<0.22.0" },
-    { name = "ruff", marker = "extra == 'test'", specifier = ">=0.6.9,<0.7.0" },
     { name = "sqlmodel", specifier = ">=0.0.24,<0.0.25" },
     { name = "streamlit", specifier = ">=1.45.1,<2.0.0" },
 ]
-provides-extras = ["test"]
+
+[package.metadata.requires-dev]
+test = [
+    { name = "pytest", specifier = ">=8.3.0,<9.0.0" },
+    { name = "pytest-cov", specifier = ">=5.0.0,<6.0.0" },
+    { name = "respx", specifier = ">=0.21.1,<0.22.0" },
+    { name = "ruff", specifier = ">=0.6.9,<0.7.0" },
+]
 
 [[package]]
 name = "blinker"

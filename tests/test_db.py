@@ -1,24 +1,14 @@
-import os
-import sys
-
-
-# Ensure the `src` directory is on sys.path for imports like `db` and `models.*`.
-CURRENT_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-
 from sqlmodel import select
 
 from db import make_session_factory
 from domain.models import Instrument as DomainInstrument
-from persistence.models import InstrumentTable  # ensure metadata registration
+from persistence.models import InstrumentTable
 from persistence.repositories import InstrumentRepository
 
 
 def test_get_session_in_memory_can_create_tables() -> None:
     # Import persistence models before creating tables so metadata is populated
-    _ = InstrumentTable  # noqa: F401
+    assert InstrumentTable.__tablename__ == "instruments"
 
     # Create a session factory for an in-memory SQLite database
     session_factory = make_session_factory("sqlite:///:memory:")

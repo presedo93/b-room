@@ -1,14 +1,5 @@
-import os
-import sys
-from typing import Iterable
-
-
-# Ensure `src` on sys.path
-CURRENT_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-
+from collections.abc import Iterable
+from typing import override
 from sqlmodel import Session
 
 from db import make_session_factory
@@ -17,14 +8,14 @@ from adapters.exchanges.base import ExchangeInstrumentDTO, ExchangeClient
 from services.exchange_service import ExchangeService
 
 # Import persistence models before creating tables
-from persistence.models import InstrumentTable  # noqa: F401
+from persistence.models import InstrumentTable
 
 
 class StubRepo:
     def __init__(self) -> None:
         self._items: list[DomainInstrument] = []
 
-    def upsert_many(self, session: Session, items: Iterable[DomainInstrument]) -> None:  # noqa: ARG002 - session unused
+    def upsert_many(self, _session: Session, items: Iterable[DomainInstrument]) -> None:
         # emulate deduplication by (exchange, name)
         existing = {(i.exchange, i.name) for i in self._items}
         for it in items:
@@ -39,7 +30,9 @@ class StubRepo:
                 self._items.append(it)
                 existing.add(key)
 
-    def list_by_exchange(self, session: Session, exchange: str) -> list[DomainInstrument]:  # noqa: ARG002 - session unused
+    def list_by_exchange(
+        self, _session: Session, exchange: str
+    ) -> list[DomainInstrument]:
         return [i for i in self._items if i.exchange == exchange]
 
 
@@ -48,14 +41,18 @@ class StubClient(ExchangeClient):
         self._items = items
 
     @property
+    @override
     def name(self) -> str:
         return "stub"
 
-    def list_instruments(self, category: str) -> list[ExchangeInstrumentDTO]:  # noqa: ARG002 - category unused
+    @override
+    def list_instruments(self, category: str) -> list[ExchangeInstrumentDTO]:
         return list(self._items)
 
 
 def test_exchange_service_populate_and_list() -> None:
+    assert InstrumentTable.__tablename__ == "instruments"
+
     session_factory = make_session_factory("sqlite:///:memory:")
     repo = StubRepo()
     items = [
@@ -64,7 +61,9 @@ def test_exchange_service_populate_and_list() -> None:
     ]
     client = StubClient(items)
 
-    svc = ExchangeService(session_factory=session_factory, repository=repo, clients={"bybit": client})
+    svc = ExchangeService(
+        session_factory=session_factory, repository=repo, clients={"bybit": client}
+    )
 
     # Populate
     count = svc.populate_instruments("bybit", "linear")
@@ -74,4 +73,3 @@ def test_exchange_service_populate_and_list() -> None:
     listed = svc.list_instruments("bybit")
     names = sorted(i.name for i in listed)
     assert names == ["BTCUSDT", "ETHUSDT"]
-
