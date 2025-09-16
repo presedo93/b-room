@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Mapping, Sequence
 
 from strategies.base import Strategy, StrategyResult
 from strategies.example.simple_ma import SimpleMA
@@ -39,4 +39,3 @@ class StrategyService:
             return [50, 49, 50, 51, 50, 52, 53, 52, 54, 55]
         # default deterministic sequence
         return [1, 1.1, 1.2, 1.15, 1.25]
-

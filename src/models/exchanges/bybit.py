@@ -4,12 +4,6 @@ This module contains pydantic models that mirror the ByBit API responses and
 convenience helpers to fetch instrument lists from the public API.
 """
 
-from __future__ import annotations
-
-# Allow imports from third-party packages that may not be available in the
-# linting environment.
-# pylint: disable=import-error
-
 from enum import Enum
 from typing import Generic, TypeVar, ClassVar
 

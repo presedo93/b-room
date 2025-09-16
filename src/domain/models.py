@@ -4,8 +4,6 @@ This module defines dataclasses representing core domain entities, independent
 from persistence or external adapter DTOs.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 
@@ -18,4 +16,3 @@ class Instrument:
     kind: str
     base: str
     quote: str
-

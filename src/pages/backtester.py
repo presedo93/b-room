@@ -4,8 +4,6 @@ Stage 3 provides only the UI scaffolding; strategy execution is integrated in
 Stage 4.
 """
 
-from __future__ import annotations
-
 from typing import Callable
 
 import streamlit as st

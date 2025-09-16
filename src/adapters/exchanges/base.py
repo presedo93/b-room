@@ -1,7 +1,5 @@
 """Exchange adapter base interfaces and DTOs."""
 
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
@@ -29,4 +27,3 @@ class ExchangeClient(ABC):
     def list_instruments(self, category: str) -> list[ExchangeInstrumentDTO]:
         """Return instruments for the given category (e.g., 'linear')."""
         ...
-

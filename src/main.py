@@ -6,10 +6,6 @@ implementations remain in this file for now but are not used by default.
 
 import streamlit as st
 from loguru import logger
-from sqlmodel import SQLModel
-
-# Ensure persistence models are imported so tables exist when session factory builds
-from persistence import models as _persistence_models  # noqa: F401
 
 from app import create_app_context
 from pages.registry import PageSpec, build_pages
@@ -24,8 +20,6 @@ logger.info("Dashboard started")
 
 def _build_navigation_pages():
     ctx = create_app_context()
-    # Ensure metadata is initialized (tables created) — create_app_context makes tables.
-    _ = SQLModel.metadata  # noqa: F841
 
     specs = [
         PageSpec(title="Exchanges", icon="🔀", factory=make_exchanges_page),

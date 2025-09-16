@@ -1,6 +1,7 @@
-"""ByBit exchange adapter wrapping existing DTOs and mapping to normalized DTOs."""
+"""ByBit exchange adapter wrapping existing DTOs and mapping to normalized
+DTOs."""
 
-from __future__ import annotations
+from typing import override
 
 from adapters.exchanges.base import ExchangeClient, ExchangeInstrumentDTO
 from models.exchanges.bybit import ByBitInstrument, ByBitCategory
@@ -8,9 +9,11 @@ from models.exchanges.bybit import ByBitInstrument, ByBitCategory
 
 class ByBitClient(ExchangeClient):
     @property
+    @override
     def name(self) -> str:  # pragma: no cover - trivial
         return "bybit"
 
+    @override
     def list_instruments(self, category: str) -> list[ExchangeInstrumentDTO]:
         cat = ByBitCategory.from_str(category)
         data = ByBitInstrument.fetch(cat)

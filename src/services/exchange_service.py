@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Callable, Mapping
+from typing import Callable
 
 from sqlmodel import Session
 
@@ -27,7 +28,11 @@ class ExchangeService:
     def with_defaults(
         cls, session_factory: Callable[[], Session], repository: InstrumentRepository
     ) -> "ExchangeService":
-        return cls(session_factory=session_factory, repository=repository, clients=_default_clients())
+        return cls(
+            session_factory=session_factory,
+            repository=repository,
+            clients=_default_clients(),
+        )
 
     def populate_instruments(self, exchange: str, category: str) -> int:
         """Fetch instruments from an exchange and persist them via repository.
@@ -55,4 +60,6 @@ class ExchangeService:
 
     @staticmethod
     def _dto_to_domain(d: ExchangeInstrumentDTO) -> DomainInstrument:
-        return DomainInstrument(exchange=d.exchange, name=d.name, kind=d.kind, base=d.base, quote=d.quote)
+        return DomainInstrument(
+            exchange=d.exchange, name=d.name, kind=d.kind, base=d.base, quote=d.quote
+        )
