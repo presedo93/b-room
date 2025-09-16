@@ -5,9 +5,7 @@ domain logic. Mapping between these and domain models is handled by
 repositories.
 """
 
-from __future__ import annotations
-
-from typing import Annotated, ClassVar
+from typing import Annotated
 
 from sqlmodel import Field, SQLModel
 
@@ -18,8 +16,7 @@ class InstrumentTable(SQLModel, table=True):
     Composite primary key: (exchange, name)
     """
 
-    __tablename__ = "instrument"  # keep same name for continuity
-    __table_args__: ClassVar[dict[str, bool]] = {"extend_existing": True}
+    __tablename__: str = "instruments"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     exchange: Annotated[str, Field(primary_key=True)]
     name: Annotated[str, Field(primary_key=True)]

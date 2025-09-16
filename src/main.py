@@ -14,7 +14,7 @@ from pages.backtester import make_backtester_page
 
 
 logger.level("DEBUG")
-logger.add("xini.log", retention="2 days")
+logger.add("room.log", retention="2 days")
 logger.info("Dashboard started")
 
 

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 
 @dataclass(slots=True)
@@ -34,10 +34,9 @@ class Strategy(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
-    def configure(self, **params: object) -> None:  # pragma: no cover - default no-op
+    def configure(self, **_params: object) -> None:  # pragma: no cover - default no-op
         """Optional configuration hook."""
         return None
 
@@ -45,4 +44,3 @@ class Strategy(ABC):
     def backtest(self, prices: Sequence[float]) -> StrategyResult:
         """Run the strategy on a sequence of close prices."""
         ...
-

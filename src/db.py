@@ -15,7 +15,7 @@ from sqlmodel import SQLModel, Session, create_engine
 
 
 # Default database URL for the application. File-based SQLite to persist data.
-DEFAULT_DB_URL = "sqlite:///xini.db"
+DEFAULT_DB_URL = "sqlite:///room.db"
 
 
 def _make_engine(database_url: str, *, echo: bool = False) -> Engine:
@@ -38,7 +38,10 @@ def _make_engine(database_url: str, *, echo: bool = False) -> Engine:
 
 
 def make_session_factory(
-    database_url: str = DEFAULT_DB_URL, *, echo: bool = False, create_tables: bool = True
+    database_url: str = DEFAULT_DB_URL,
+    *,
+    echo: bool = False,
+    create_tables: bool = True,
 ) -> Callable[[], Session]:
     """Return a zero-arg callable that creates a `Session` bound to a stable engine.
 
@@ -66,4 +69,3 @@ def get_session(database_url: str = DEFAULT_DB_URL, *, echo: bool = False) -> Se
     """
     engine = _make_engine(database_url, echo=echo)
     return Session(engine)
-

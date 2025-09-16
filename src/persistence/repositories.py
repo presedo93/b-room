@@ -4,10 +4,7 @@ Provides an InstrumentRepository to read/write instruments while mapping to
 domain models.
 """
 
-from __future__ import annotations
-
-from typing import Iterable
-
+from collections.abc import Iterable
 from sqlalchemy.dialects.sqlite import insert
 from sqlmodel import Session, select
 
@@ -40,12 +37,18 @@ class InstrumentRepository:
             )
             session.connection().execute(stmt)
 
-    def list_by_exchange(self, session: Session, exchange: str) -> list[DomainInstrument]:
+    def list_by_exchange(
+        self, session: Session, exchange: str
+    ) -> list[DomainInstrument]:
         """List all instruments for an exchange as domain models."""
-        rows = session.exec(select(InstrumentTable).where(InstrumentTable.exchange == exchange)).all()
+        rows = session.exec(
+            select(InstrumentTable).where(InstrumentTable.exchange == exchange)
+        ).all()
         return [self._to_domain(r) for r in rows]
 
-    def get(self, session: Session, exchange: str, name: str) -> DomainInstrument | None:
+    def get(
+        self, session: Session, exchange: str, name: str
+    ) -> DomainInstrument | None:
         """Get a single instrument by exchange and name."""
         row = session.exec(
             select(InstrumentTable).where(
@@ -57,5 +60,9 @@ class InstrumentRepository:
     @staticmethod
     def _to_domain(row: InstrumentTable) -> DomainInstrument:
         return DomainInstrument(
-            exchange=row.exchange, name=row.name, kind=row.kind, base=row.base, quote=row.quote
+            exchange=row.exchange,
+            name=row.name,
+            kind=row.kind,
+            base=row.base,
+            quote=row.quote,
         )

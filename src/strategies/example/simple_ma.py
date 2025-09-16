@@ -6,8 +6,9 @@ below SMA(N). No shorting, one position max.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
+from typing import override
 
 from strategies.base import Strategy, StrategyResult, Trade
 
@@ -32,9 +33,11 @@ class SimpleMA(Strategy):
     period: int = 3
 
     @property
+    @override
     def name(self) -> str:  # pragma: no cover - trivial
         return f"SimpleMA({self.period})"
 
+    @override
     def backtest(self, prices: Sequence[float]) -> StrategyResult:
         ma = _sma(prices, self.period)
         in_position = False
@@ -58,19 +61,31 @@ class SimpleMA(Strategy):
                 # Cross down: (was above) -> now not above
                 elif prev_above and not above and in_position:
                     in_position = False
-                    trade = Trade(entry_index=entry_idx, exit_index=i, entry_price=entry_price, exit_price=price)
+                    trade = Trade(
+                        entry_index=entry_idx,
+                        exit_index=i,
+                        entry_price=entry_price,
+                        exit_price=price,
+                    )
                     trades.append(trade)
-                    equity_val *= (1.0 + trade.pnl)
+                    equity_val *= 1.0 + trade.pnl
             prev_above = above
             equity.append(equity_val)
 
         # If we end in position, close at last price
         if in_position and entry_idx >= 0:
             price = float(prices[-1])
-            trade = Trade(entry_index=entry_idx, exit_index=len(prices) - 1, entry_price=entry_price, exit_price=price)
+            trade = Trade(
+                entry_index=entry_idx,
+                exit_index=len(prices) - 1,
+                entry_price=entry_price,
+                exit_price=price,
+            )
             trades.append(trade)
-            equity_val *= (1.0 + trade.pnl)
+            equity_val *= 1.0 + trade.pnl
             equity[-1] = equity_val
 
         total_return = equity_val - 1.0
-        return StrategyResult(trades=trades, total_return=total_return, equity_curve=equity)
+        return StrategyResult(
+            trades=trades, total_return=total_return, equity_curve=equity
+        )
